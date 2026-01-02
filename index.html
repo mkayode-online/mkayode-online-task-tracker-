@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mkayode Online Task Tracker</title>
-    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         body { margin: 0; padding: 0; }
     </style>
@@ -15,469 +15,572 @@
 <body>
     <div id="root"></div>
     
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-        
-        // Lucide Icons as inline SVG components
-        const Plus = ({ size = 24, ...props }) => (
-            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-        );
-        
-        const Trash2 = ({ size = 24, ...props }) => (
-            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                <line x1="10" y1="11" x2="10" y2="17"></line>
-                <line x1="14" y1="11" x2="14" y2="17"></line>
-            </svg>
-        );
-        
-        const Edit2 = ({ size = 24, ...props }) => (
-            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
-            </svg>
-        );
-        
-        const Check = ({ size = 24, ...props }) => (
-            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-                <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-        );
-        
-        const X = ({ size = 24, ...props }) => (
-            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-        );
-        
-        const Calendar = ({ size = 24, ...props }) => (
-            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
-        );
-        
-        const TrendingUp = ({ size = 24, ...props }) => (
-            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-                <polyline points="17 6 23 6 23 12"></polyline>
-            </svg>
-        );
-        
-        const Moon = ({ size = 24, ...props }) => (
-            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-            </svg>
-        );
-        
-        const Sun = ({ size = 24, ...props }) => (
-            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-                <circle cx="12" cy="12" r="5"></circle>
-                <line x1="12" y1="1" x2="12" y2="3"></line>
-                <line x1="12" y1="21" x2="12" y2="23"></line>
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                <line x1="1" y1="12" x2="3" y2="12"></line>
-                <line x1="21" y1="12" x2="23" y2="12"></line>
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-            </svg>
-        );
+    <script>
+        // ============================================
+        // FIREBASE CONFIGURATION
+        // ============================================
+        // IMPORTANT: Replace these with your own Firebase config
+        // Get this from Firebase Console > Project Settings > Your apps > Firebase SDK snippet
+        // Import the functions you need from the SDKs you need
+        // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-        function MonthlyTaskTracker() {
-          const [tasks, setTasks] = useState(() => {
-            const saved = localStorage.getItem('monthlyTasks');
-            return saved ? JSON.parse(saved) : [
-              { id: 1, title: 'Sample Task', week: 1, month: 1, year: 2026, completed: false, category: 'Work' },
-              { id: 2, title: 'Another Task', week: 1, month: 1, year: 2026, completed: true, category: 'Personal' }
-            ];
-          });
-          const [isAdding, setIsAdding] = useState(false);
-          const [editingId, setEditingId] = useState(null);
-          const [selectedMonth, setSelectedMonth] = useState(() => {
-            const saved = localStorage.getItem('selectedMonth');
-            return saved ? Number(saved) : 1;
-          });
-          const [selectedYear, setSelectedYear] = useState(() => {
-            const saved = localStorage.getItem('selectedYear');
-            return saved ? Number(saved) : 2026;
-          });
-          const [darkMode, setDarkMode] = useState(() => {
-            const saved = localStorage.getItem('darkMode');
-            return saved ? JSON.parse(saved) : false;
-          });
-          const [formData, setFormData] = useState({
-            title: '',
-            week: 1,
-            month: 1,
-            year: 2026,
-            completed: false,
-            category: 'Work'
-          });
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyD2Lj6-ML72Ok3ZhMlN2_GorYOguZzyRQY",
+  authDomain: "mkayo-tasks-tracker.firebaseapp.com",
+  databaseURL: "https://mkayo-tasks-tracker-default-rtdb.firebaseio.com",
+  projectId: "mkayo-tasks-tracker",
+  storageBucket: "mkayo-tasks-tracker.firebasestorage.app",
+  messagingSenderId: "247715284898",
+  appId: "1:247715284898:web:57b66ddd7483061b9694fb"
+};
 
-          useEffect(() => {
-            localStorage.setItem('monthlyTasks', JSON.stringify(tasks));
-          }, [tasks]);
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 
-          useEffect(() => {
-            localStorage.setItem('selectedMonth', selectedMonth.toString());
-          }, [selectedMonth]);
+        // Admin email - CHANGE THIS TO YOUR EMAIL
+        const ADMIN_EMAIL = "mkayodeonline@gmail.com";
 
-          useEffect(() => {
-            localStorage.setItem('selectedYear', selectedYear.toString());
-          }, [selectedYear]);
+        // ============================================
+        // APP STATE
+        // ============================================
+        let currentUser = null;
+        let isAdmin = false;
+        let currentView = 'login'; // login, register, tasks, admin
 
-          useEffect(() => {
-            localStorage.setItem('darkMode', JSON.stringify(darkMode));
-          }, [darkMode]);
+        // ============================================
+        // ICONS (SVG)
+        // ============================================
+        const Icons = {
+            Plus: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
+            Trash: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`,
+            Edit: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>`,
+            Check: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+            X: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+            Moon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`,
+            Sun: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line></svg>`,
+            User: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`,
+            LogOut: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`,
+            Users: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`,
+            Activity: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>`,
+            Calendar: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`,
+            TrendingUp: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>`
+        };
 
-          const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-          const categories = ['Work', 'Personal', 'Health', 'Learning', 'Finance', 'Other'];
+        // ============================================
+        // HELPER FUNCTIONS
+        // ============================================
+        function showMessage(message, type = 'info') {
+            const colors = {
+                error: 'bg-red-500',
+                success: 'bg-green-500',
+                info: 'bg-blue-500'
+            };
+            
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-opacity`;
+            msgDiv.textContent = message;
+            document.body.appendChild(msgDiv);
+            
+            setTimeout(() => {
+                msgDiv.style.opacity = '0';
+                setTimeout(() => msgDiv.remove(), 300);
+            }, 3000);
+        }
 
-          const getWeeksInMonth = (month, year) => {
-            const firstDay = new Date(year, month - 1, 1);
-            const lastDay = new Date(year, month, 0);
-            const days = lastDay.getDate();
-            return Math.ceil((days + firstDay.getDay()) / 7);
-          };
+        // ============================================
+        // AUTH FUNCTIONS
+        // ============================================
+        async function handleRegister(email, password, name) {
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                await userCredential.user.updateProfile({ displayName: name });
+                
+                // Create user profile in database
+                await database.ref('users/' + userCredential.user.uid).set({
+                    name: name,
+                    email: email,
+                    createdAt: Date.now(),
+                    lastActive: Date.now()
+                });
+                
+                showMessage('Account created successfully!', 'success');
+                currentView = 'tasks';
+                render();
+            } catch (error) {
+                showMessage(error.message, 'error');
+            }
+        }
 
-          const filteredTasks = tasks.filter(t => t.month === selectedMonth && t.year === selectedYear);
+        async function handleLogin(email, password) {
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                showMessage('Logged in successfully!', 'success');
+                currentView = 'tasks';
+                render();
+            } catch (error) {
+                showMessage(error.message, 'error');
+            }
+        }
 
-          const getWeekStats = (weekNum) => {
-            const weekTasks = filteredTasks.filter(t => t.week === weekNum);
-            const completed = weekTasks.filter(t => t.completed).length;
-            const total = weekTasks.length;
-            const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-            return { completed, total, percentage };
-          };
+        async function handleLogout() {
+            try {
+                await auth.signOut();
+                currentView = 'login';
+                currentUser = null;
+                isAdmin = false;
+                showMessage('Logged out successfully!', 'success');
+                render();
+            } catch (error) {
+                showMessage(error.message, 'error');
+            }
+        }
 
-          const getMonthStats = () => {
+        // Listen for auth state changes
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                isAdmin = user.email === ADMIN_EMAIL;
+                
+                // Update last active
+                await database.ref('users/' + user.uid + '/lastActive').set(Date.now());
+                
+                if (currentView === 'login' || currentView === 'register') {
+                    currentView = 'tasks';
+                }
+                render();
+            } else {
+                currentUser = null;
+                isAdmin = false;
+                currentView = 'login';
+                render();
+            }
+        });
+
+        // ============================================
+        // RENDER FUNCTIONS
+        // ============================================
+        function render() {
+            const root = document.getElementById('root');
+            
+            if (currentView === 'login') {
+                root.innerHTML = renderLogin();
+            } else if (currentView === 'register') {
+                root.innerHTML = renderRegister();
+            } else if (currentView === 'tasks') {
+                root.innerHTML = renderTasksPage();
+                initializeTasksPage();
+            } else if (currentView === 'admin' && isAdmin) {
+                root.innerHTML = renderAdminPage();
+                loadAdminData();
+            }
+        }
+
+        function renderLogin() {
+            return `
+                <div class="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center p-6">
+                    <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full">
+                        <div class="text-center mb-8">
+                            <h1 class="text-3xl font-bold text-gray-800 mb-2">Welcome Back</h1>
+                            <p class="text-gray-600">Sign in to access your tasks</p>
+                        </div>
+                        
+                        <div id="login-form">
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                <input type="email" id="login-email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="your@email.com">
+                            </div>
+                            
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                                <input type="password" id="login-password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="••••••••">
+                            </div>
+                            
+                            <button onclick="handleLoginSubmit()" class="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition-colors font-medium mb-4">
+                                Sign In
+                            </button>
+                            
+                            <div class="text-center">
+                                <p class="text-gray-600">Don't have an account? 
+                                    <button onclick="currentView='register'; render();" class="text-indigo-600 hover:text-indigo-700 font-medium">Sign Up</button>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderRegister() {
+            return `
+                <div class="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center p-6">
+                    <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full">
+                        <div class="text-center mb-8">
+                            <h1 class="text-3xl font-bold text-gray-800 mb-2">Create Account</h1>
+                            <p class="text-gray-600">Start tracking your tasks today</p>
+                        </div>
+                        
+                        <div id="register-form">
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                                <input type="text" id="register-name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="John Doe">
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                <input type="email" id="register-email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="your@email.com">
+                            </div>
+                            
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                                <input type="password" id="register-password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="••••••••">
+                                <p class="text-xs text-gray-500 mt-1">Minimum 6 characters</p>
+                            </div>
+                            
+                            <button onclick="handleRegisterSubmit()" class="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition-colors font-medium mb-4">
+                                Create Account
+                            </button>
+                            
+                            <div class="text-center">
+                                <p class="text-gray-600">Already have an account? 
+                                    <button onclick="currentView='login'; render();" class="text-indigo-600 hover:text-indigo-700 font-medium">Sign In</button>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTasksPage() {
+            const darkMode = localStorage.getItem('darkMode') === 'true';
+            const adminButton = isAdmin ? `
+                <button onclick="currentView='admin'; render();" class="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                    ${Icons.Users}
+                    Admin Panel
+                </button>
+            ` : '';
+            
+            return `
+                <div class="${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50'} min-h-screen p-6 transition-colors">
+                    <div class="max-w-7xl mx-auto">
+                        <div class="mb-8 flex items-center justify-between flex-wrap gap-4">
+                            <div>
+                                <h1 class="${darkMode ? 'text-white' : 'text-gray-800'} text-4xl font-bold mb-2">Mkayode Online Task Tracker</h1>
+                                <p class="${darkMode ? 'text-gray-400' : 'text-gray-600'}">Welcome, ${currentUser?.displayName || 'User'}!</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                ${adminButton}
+                                <button onclick="toggleDarkMode()" class="${darkMode ? 'bg-gray-800 text-yellow-400 hover:bg-gray-700' : 'bg-white text-gray-700 hover:bg-gray-100'} p-3 rounded-lg transition-colors shadow-md">
+                                    ${darkMode ? Icons.Sun : Icons.Moon}
+                                </button>
+                                <button onclick="handleLogout()" class="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                                    ${Icons.LogOut}
+                                    Logout
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="tasks-content" class="space-y-6">
+                            <div class="text-center py-12">
+                                <p class="${darkMode ? 'text-gray-400' : 'text-gray-600'}">Loading your tasks...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAdminPage() {
+            return `
+                <div class="bg-gray-900 min-h-screen p-6">
+                    <div class="max-w-7xl mx-auto">
+                        <div class="mb-8 flex items-center justify-between">
+                            <div>
+                                <h1 class="text-white text-4xl font-bold mb-2">Admin Dashboard</h1>
+                                <p class="text-gray-400">Overview of all users and their activity</p>
+                            </div>
+                            <div class="flex gap-3">
+                                <button onclick="currentView='tasks'; render();" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                                    Back to Tasks
+                                </button>
+                                <button onclick="handleLogout()" class="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                                    ${Icons.LogOut}
+                                    Logout
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="admin-stats" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                            <!-- Stats will be loaded here -->
+                        </div>
+                        
+                        <div id="admin-users" class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 p-6">
+                            <h2 class="text-white text-2xl font-semibold mb-4">User List</h2>
+                            <div id="users-list" class="space-y-3">
+                                <p class="text-gray-400">Loading users...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // EVENT HANDLERS
+        // ============================================
+        function handleLoginSubmit() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            if (!email || !password) {
+                showMessage('Please fill in all fields', 'error');
+                return;
+            }
+            
+            handleLogin(email, password);
+        }
+
+        function handleRegisterSubmit() {
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            
+            if (!name || !email || !password) {
+                showMessage('Please fill in all fields', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showMessage('Password must be at least 6 characters', 'error');
+                return;
+            }
+            
+            handleRegister(email, password, name);
+        }
+
+        function toggleDarkMode() {
+            const current = localStorage.getItem('darkMode') === 'true';
+            localStorage.setItem('darkMode', (!current).toString());
+            render();
+        }
+
+        // ============================================
+        // TASKS PAGE LOGIC
+        // ============================================
+        async function initializeTasksPage() {
+            if (!currentUser) return;
+            
+            const darkMode = localStorage.getItem('darkMode') === 'true';
+            const tasksContent = document.getElementById('tasks-content');
+            
+            // Listen for user's tasks
+            const tasksRef = database.ref('tasks/' + currentUser.uid);
+            tasksRef.on('value', (snapshot) => {
+                const tasks = snapshot.val() || {};
+                renderTasksList(tasks, darkMode);
+            });
+        }
+
+        function renderTasksList(tasks, darkMode) {
+            const tasksArray = Object.entries(tasks).map(([id, task]) => ({ id, ...task }));
+            const tasksContent = document.getElementById('tasks-content');
+            
+            if (tasksArray.length === 0) {
+                tasksContent.innerHTML = `
+                    <div class="${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} p-12 rounded-xl shadow-lg border text-center">
+                        ${Icons.Calendar}
+                        <h3 class="${darkMode ? 'text-gray-300' : 'text-gray-700'} text-xl font-semibold mb-2 mt-4">No tasks yet</h3>
+                        <p class="${darkMode ? 'text-gray-500' : 'text-gray-500'}">Add your first task to get started!</p>
+                        <button onclick="addNewTask()" class="mt-4 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                            Add Task
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            const selectedMonth = parseInt(localStorage.getItem('selectedMonth') || '1');
+            const selectedYear = parseInt(localStorage.getItem('selectedYear') || '2026');
+            
+            const filteredTasks = tasksArray.filter(t => t.month === selectedMonth && t.year === selectedYear);
+            
+            // Calculate stats
             const completed = filteredTasks.filter(t => t.completed).length;
             const total = filteredTasks.length;
             const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-            return { completed, total, percentage };
-          };
-
-          const getCategoryStats = () => {
-            return categories.map(cat => {
-              const catTasks = filteredTasks.filter(t => t.category === cat);
-              const completed = catTasks.filter(t => t.completed).length;
-              const total = catTasks.length;
-              const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-              return { category: cat, completed, total, percentage };
-            }).filter(stat => stat.total > 0);
-          };
-
-          const handleSubmit = () => {
-            if (!formData.title.trim()) return;
             
-            if (editingId) {
-              setTasks(tasks.map(task => 
-                task.id === editingId ? { ...formData, id: editingId } : task
-              ));
-              setEditingId(null);
-            } else {
-              setTasks([...tasks, { ...formData, id: Date.now() }]);
-            }
-            setFormData({ title: '', week: 1, month: selectedMonth, year: selectedYear, completed: false, category: 'Work' });
-            setIsAdding(false);
-          };
-
-          const handleEdit = (task) => {
-            setFormData(task);
-            setEditingId(task.id);
-            setIsAdding(true);
-          };
-
-          const handleDelete = (id) => {
-            setTasks(tasks.filter(task => task.id !== id));
-          };
-
-          const toggleComplete = (id) => {
-            setTasks(tasks.map(task => 
-              task.id === id ? { ...task, completed: !task.completed } : task
-            ));
-          };
-
-          const handleCancel = () => {
-            setIsAdding(false);
-            setEditingId(null);
-            setFormData({ title: '', week: 1, month: selectedMonth, year: selectedYear, completed: false, category: 'Work' });
-          };
-
-          const monthStats = getMonthStats();
-          const weeksCount = getWeeksInMonth(selectedMonth, selectedYear);
-          const categoryStats = getCategoryStats();
-
-          return (
-            <div className={`min-h-screen p-6 transition-colors ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50'}`}>
-              <div className="max-w-7xl mx-auto">
-                <div className="mb-8 flex items-center justify-between">
-                  <div>
-                    <h1 className={`text-4xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Mkayode Online Task Tracker</h1>
-                    <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Track your progress week by week</p>
-                  </div>
-                  <button
-                    onClick={() => setDarkMode(!darkMode)}
-                    className={`p-3 rounded-lg transition-colors ${darkMode ? 'bg-gray-800 text-yellow-400 hover:bg-gray-700' : 'bg-white text-gray-700 hover:bg-gray-100'} shadow-md`}
-                    aria-label="Toggle dark mode"
-                  >
-                    {darkMode ? <Sun size={24} /> : <Moon size={24} />}
-                  </button>
-                </div>
-
-                <div className={`p-6 rounded-xl shadow-lg mb-6 border ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-                  <div className="flex items-center gap-4 mb-4">
-                    <Calendar className={darkMode ? 'text-indigo-400' : 'text-indigo-600'} size={24} />
-                    <h2 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Select Month</h2>
-                  </div>
-                  <div className="flex gap-4 flex-wrap">
-                    <select
-                      value={selectedMonth}
-                      onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                      className={`px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
-                    >
-                      {months.map((m, i) => (
-                        <option key={i} value={i + 1}>{m}</option>
-                      ))}
-                    </select>
-                    <select
-                      value={selectedYear}
-                      onChange={(e) => setSelectedYear(Number(e.target.value))}
-                      className={`px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
-                    >
-                      {[2024, 2025, 2026, 2027].map(y => (
-                        <option key={y} value={y}>{y}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                  <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-6 rounded-xl shadow-lg text-white">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold">Month Overview</h3>
-                      <TrendingUp size={24} />
+            tasksContent.innerHTML = `
+                <div class="${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} p-6 rounded-xl shadow-lg border">
+                    <h2 class="${darkMode ? 'text-white' : 'text-gray-800'} text-xl font-semibold mb-4">Quick Stats</h2>
+                    <div class="text-center">
+                        <div class="text-5xl font-bold text-indigo-600 mb-2">${percentage}%</div>
+                        <p class="${darkMode ? 'text-gray-400' : 'text-gray-600'}">${completed} of ${total} tasks completed</p>
                     </div>
-                    <div className="text-5xl font-bold mb-2">{monthStats.percentage}%</div>
-                    <p className="text-indigo-100">{monthStats.completed} of {monthStats.total} tasks completed</p>
-                  </div>
-
-                  <div className={`p-6 rounded-xl shadow-lg border col-span-1 lg:col-span-2 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-                    <h3 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Weekly Progress</h3>
-                    <div className="space-y-3">
-                      {[...Array(weeksCount)].map((_, i) => {
-                        const stats = getWeekStats(i + 1);
-                        return (
-                          <div key={i}>
-                            <div className="flex items-center justify-between mb-1">
-                              <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Week {i + 1}</span>
-                              <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{stats.completed}/{stats.total} ({stats.percentage}%)</span>
-                            </div>
-                            <div className={`w-full rounded-full h-3 overflow-hidden ${darkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
-                              <div 
-                                className="bg-gradient-to-r from-indigo-500 to-purple-600 h-3 rounded-full transition-all duration-500"
-                                style={{ width: `${stats.percentage}%` }}
-                              />
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
                 </div>
-
-                {categoryStats.length > 0 && (
-                  <div className={`p-6 rounded-xl shadow-lg border mb-6 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-                    <h3 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Progress by Category</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {categoryStats.map(stat => (
-                        <div key={stat.category} className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className={`font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>{stat.category}</span>
-                            <span className="text-sm font-bold text-indigo-400">{stat.percentage}%</span>
-                          </div>
-                          <div className={`text-sm mb-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{stat.completed}/{stat.total} completed</div>
-                          <div className={`w-full rounded-full h-2 ${darkMode ? 'bg-gray-600' : 'bg-gray-200'}`}>
-                            <div 
-                              className="bg-indigo-500 h-2 rounded-full transition-all duration-500"
-                              style={{ width: `${stat.percentage}%` }}
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {!isAdding && (
-                  <button
-                    onClick={() => setIsAdding(true)}
-                    className="mb-6 flex items-center gap-2 px-5 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-md"
-                  >
-                    <Plus size={20} />
+                
+                <button onclick="addNewTask()" class="flex items-center gap-2 px-5 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-md">
+                    ${Icons.Plus}
                     Add New Task
-                  </button>
-                )}
-
-                {isAdding && (
-                  <div className={`p-6 rounded-xl shadow-lg border mb-6 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-                    <h2 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                      {editingId ? 'Edit Task' : 'New Task'}
-                    </h2>
-                    <div className="space-y-4">
-                      <div>
-                        <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Task Title</label>
-                        <input
-                          type="text"
-                          value={formData.title}
-                          onChange={(e) => setFormData({...formData, title: e.target.value})}
-                          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300'}`}
-                          placeholder="Enter task title"
-                        />
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                          <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Week</label>
-                          <select
-                            value={formData.week}
-                            onChange={(e) => setFormData({...formData, week: Number(e.target.value)})}
-                            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
-                          >
-                            {[...Array(weeksCount)].map((_, i) => (
-                              <option key={i} value={i + 1}>Week {i + 1}</option>
-                            ))}
-                          </select>
-                        </div>
-                        
-                        <div>
-                          <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Category</label>
-                          <select
-                            value={formData.category}
-                            onChange={(e) => setFormData({...formData, category: e.target.value})}
-                            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
-                          >
-                            {categories.map(cat => (
-                              <option key={cat} value={cat}>{cat}</option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Status</label>
-                          <select
-                            value={formData.completed ? 'completed' : 'pending'}
-                            onChange={(e) => setFormData({...formData, completed: e.target.value === 'completed'})}
-                            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
-                          >
-                            <option value="pending">Pending</option>
-                            <option value="completed">Completed</option>
-                          </select>
-                        </div>
-                      </div>
-                      
-                      <div className="flex gap-3">
-                        <button
-                          onClick={handleSubmit}
-                          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                        >
-                          <Check size={18} />
-                          {editingId ? 'Update Task' : 'Create Task'}
-                        </button>
-                        <button
-                          onClick={handleCancel}
-                          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                        >
-                          <X size={18} />
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div className="space-y-4">
-                  {[...Array(weeksCount)].map((_, weekIndex) => {
-                    const weekNum = weekIndex + 1;
-                    const weekTasks = filteredTasks.filter(t => t.week === weekNum);
-                    const weekStats = getWeekStats(weekNum);
-                    
-                    if (weekTasks.length === 0) return null;
-
-                    return (
-                      <div key={weekNum} className={`rounded-xl shadow-lg border overflow-hidden ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-                        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-4 text-white">
-                          <div className="flex items-center justify-between">
-                            <h3 className="text-lg font-semibold">Week {weekNum}</h3>
-                            <div className="flex items-center gap-4">
-                              <span className="text-sm">{weekStats.completed}/{weekStats.total} tasks</span>
-                              <span className="text-lg font-bold">{weekStats.percentage}%</span>
+                </button>
+                
+                <div class="space-y-3">
+                    ${filteredTasks.map(task => `
+                        <div class="${darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-50'} p-4 rounded-lg shadow border ${darkMode ? 'border-gray-700' : 'border-gray-200'} transition-colors">
+                            <div class="flex items-center gap-3">
+                                <input type="checkbox" ${task.completed ? 'checked' : ''} 
+                                    onchange="toggleTask('${task.id}', ${!task.completed})"
+                                    class="w-5 h-5 text-indigo-600 rounded cursor-pointer">
+                                <div class="flex-1">
+                                    <div class="${task.completed ? 'line-through text-gray-500' : darkMode ? 'text-white' : 'text-gray-800'} font-medium">
+                                        ${task.title}
+                                    </div>
+                                    <div class="${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm">
+                                        Week ${task.week} • ${task.category}
+                                    </div>
+                                </div>
+                                <button onclick="deleteTask('${task.id}')" class="${darkMode ? 'text-red-400 hover:bg-gray-600' : 'text-red-600 hover:bg-red-50'} p-2 rounded transition-colors">
+                                    ${Icons.Trash}
+                                </button>
                             </div>
-                          </div>
                         </div>
-                        
-                        <div className="p-4">
-                          <div className="space-y-2">
-                            {weekTasks.map(task => (
-                              <div 
-                                key={task.id}
-                                className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-50 hover:bg-gray-100'}`}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={task.completed}
-                                  onChange={() => toggleComplete(task.id)}
-                                  className="w-5 h-5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500 cursor-pointer"
-                                />
-                                <div className="flex-1">
-                                  <div className={`font-medium ${task.completed ? `line-through ${darkMode ? 'text-gray-500' : 'text-gray-500'}` : darkMode ? 'text-white' : 'text-gray-800'}`}>
-                                    {task.title}
-                                  </div>
-                                  <div className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{task.category}</div>
-                                </div>
-                                <div className="flex gap-2">
-                                  <button
-                                    onClick={() => handleEdit(task)}
-                                    className={`p-2 rounded transition-colors ${darkMode ? 'text-indigo-400 hover:bg-gray-600' : 'text-indigo-600 hover:bg-indigo-50'}`}
-                                  >
-                                    <Edit2 size={16} />
-                                  </button>
-                                  <button
-                                    onClick={() => handleDelete(task.id)}
-                                    className={`p-2 rounded transition-colors ${darkMode ? 'text-red-400 hover:bg-gray-600' : 'text-red-600 hover:bg-red-50'}`}
-                                  >
-                                    <Trash2 size={16} />
-                                  </button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                    `).join('')}
                 </div>
-
-                {filteredTasks.length === 0 && (
-                  <div className={`p-12 rounded-xl shadow-lg border text-center ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-                    <Calendar className={`mx-auto mb-4 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`} size={48} />
-                    <h3 className={`text-xl font-semibold mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>No tasks for {months[selectedMonth - 1]} {selectedYear}</h3>
-                    <p className={darkMode ? 'text-gray-500' : 'text-gray-500'}>Add your first task to get started!</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          );
+            `;
         }
 
-        ReactDOM.render(<MonthlyTaskTracker />, document.getElementById('root'));
+        async function addNewTask() {
+            const title = prompt('Enter task title:');
+            if (!title) return;
+            
+            const week = parseInt(prompt('Enter week number (1-4):') || '1');
+            const category = prompt('Enter category (Work, Personal, Health, Learning, Finance, Other):') || 'Work';
+            
+            const month = parseInt(localStorage.getItem('selectedMonth') || '1');
+            const year = parseInt(localStorage.getItem('selectedYear') || '2026');
+            
+            const taskRef = database.ref('tasks/' + currentUser.uid).push();
+            await taskRef.set({
+                title: title,
+                week: week,
+                month: month,
+                year: year,
+                category: category,
+                completed: false,
+                createdAt: Date.now()
+            });
+            
+            showMessage('Task added successfully!', 'success');
+        }
+
+        async function toggleTask(taskId, completed) {
+            await database.ref('tasks/' + currentUser.uid + '/' + taskId + '/completed').set(completed);
+        }
+
+        async function deleteTask(taskId) {
+            if (confirm('Are you sure you want to delete this task?')) {
+                await database.ref('tasks/' + currentUser.uid + '/' + taskId).remove();
+                showMessage('Task deleted', 'success');
+            }
+        }
+
+        // ============================================
+        // ADMIN PANEL LOGIC
+        // ============================================
+        async function loadAdminData() {
+            const usersSnapshot = await database.ref('users').once('value');
+            const users = usersSnapshot.val() || {};
+            
+            const tasksSnapshot = await database.ref('tasks').once('value');
+            const allTasks = tasksSnapshot.val() || {};
+            
+            const usersList = Object.entries(users).map(([uid, user]) => ({
+                uid,
+                ...user,
+                taskCount: allTasks[uid] ? Object.keys(allTasks[uid]).length : 0
+            }));
+            
+            const totalUsers = usersList.length;
+            const activeToday = usersList.filter(u => {
+                const lastActive = u.lastActive || 0;
+                const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
+                return lastActive > oneDayAgo;
+            }).length;
+            
+            let totalTasks = 0;
+            let completedTasks = 0;
+            Object.values(allTasks).forEach(userTasks => {
+                Object.values(userTasks).forEach(task => {
+                    totalTasks++;
+                    if (task.completed) completedTasks++;
+                });
+            });
+            
+            // Render stats
+            document.getElementById('admin-stats').innerHTML = `
+                <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-xl shadow-lg text-white">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Total Users</h3>
+                        ${Icons.Users}
+                    </div>
+                    <div class="text-4xl font-bold">${totalUsers}</div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-xl shadow-lg text-white">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Active Today</h3>
+                        ${Icons.Activity}
+                    </div>
+                    <div class="text-4xl font-bold">${activeToday}</div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-purple-500 to-purple-600 p-6 rounded-xl shadow-lg text-white">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Total Tasks</h3>
+                        ${Icons.Calendar}
+                    </div>
+                    <div class="text-4xl font-bold">${totalTasks}</div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 p-6 rounded-xl shadow-lg text-white">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Completed</h3>
+                        ${Icons.TrendingUp}
+                    </div>
+                    <div class="text-4xl font-bold">${completedTasks}</div>
+                </div>
+            `;
+            
+            // Render users list
+            document.getElementById('users-list').innerHTML = usersList.map(user => {
+                const lastActive = user.lastActive ? new Date(user.lastActive).toLocaleString() : 'Never';
+                return `
+                    <div class="bg-gray-700 p-4 rounded-lg flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
+                                ${user.name?.charAt(0).toUpperCase() || 'U'}
+                            </div>
+                            <div>
+                                <div class="text-white font-medium">${user.name || 'Unknown'}</div>
+                                <div class="text-gray-400 text-sm">${user.email}</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-white font-medium">${user.taskCount} tasks</div>
+                            <div class="text-gray-400 text-sm">Last active: ${lastActive}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ============================================
+        // INITIALIZE APP
+        // ============================================
+        render();
     </script>
 </body>
-  </html>
+    </html>
