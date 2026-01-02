@@ -94,11 +94,86 @@ return `
 <div class="p-6 max-w-4xl mx-auto">
 <div class="flex justify-between items-center mb-6">
 <h1 class="text-3xl font-bold">User Dashboard</h1>
-<button onclick="logout()" class="bg-red-600 text-white px-4 py-2 rounded">Logout</button>
+<button onclick="openTaskModal()"
+class="bg-indigo-600 text-white px-4 py-2 rounded mb-4">
++ Add New Task
+</button>
+
+<!-- TASK MODAL -->
+<div id="taskModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+  <div class="bg-white rounded-xl w-full max-w-md p-6">
+    <h2 class="text-xl font-bold mb-4">Add New Task</h2>
+
+    <input id="taskTitle" class="w-full border p-3 rounded mb-3"
+      placeholder="Task title">
+
+    <textarea id="taskDesc" class="w-full border p-3 rounded mb-3"
+      placeholder="Task description"></textarea>
+
+    <div class="flex gap-2 mb-3">
+      <select id="taskWeek" class="w-full border p-2 rounded">
+        <option value="1">Week 1</option>
+        <option value="2">Week 2</option>
+        <option value="3">Week 3</option>
+        <option value="4">Week 4</option>
+      </select>
+
+      <select id="taskCategory" class="w-full border p-2 rounded">
+        <option>Work</option>
+        <option>Personal</option>
+        <option>Health</option>
+        <option>Learning</option>
+        <option>Finance</option>
+      </select>
+    </div>
+
+    <input id="taskDue" type="date"
+      class="w-full border p-2 rounded mb-4">
+
+    <div class="flex justify-end gap-2">
+      <button onclick="closeTaskModal()"
+        class="px-4 py-2 bg-gray-300 rounded">
+        Cancel
+      </button>
+      <button onclick="saveTask()"
+        class="px-4 py-2 bg-indigo-600 text-white rounded">
+        Save Task
+      </button>
+    </div>
+  </div>
 </div>
-<button onclick="addTask()" class="bg-indigo-600 text-white px-4 py-2 rounded mb-4">Add Task</button>
-<div id="userTasks"></div>
-</div>`;
+
+function openTaskModal(){
+  document.getElementById("taskModal").classList.remove("hidden");
+  document.getElementById("taskModal").classList.add("flex");
+}
+
+function closeTaskModal(){
+  document.getElementById("taskModal").classList.add("hidden");
+}
+
+function saveTask(){
+  const title = taskTitle.value.trim();
+  if(!title) return alert("Task title required");
+
+  const month = new Date().getMonth()+1;
+  const year = new Date().getFullYear();
+
+  db.ref("tasks/"+currentUser.uid).push({
+    title,
+    description: taskDesc.value,
+    week: Number(taskWeek.value),
+    category: taskCategory.value,
+    dueDate: taskDue.value,
+    month,
+    year,
+    completed:false,
+    createdAt: Date.now()
+  });
+
+  closeTaskModal();
+}
+
 }
 
 function adminDashboard() {
