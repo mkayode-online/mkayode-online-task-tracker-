@@ -1,232 +1,587 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>MKayode CRM</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
-
-<!-- Firebase (compat for browser use) -->
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mkayode Online Task Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <style>
+        body { margin: 0; padding: 0; }
+    </style>
 </head>
+<body>
+    <div id="root"></div>
+    
+    <script>
+        // ============================================
+        // FIREBASE CONFIGURATION
+        // ============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyD2Lj6-ML72Ok3ZhMlN2_GorYOguZzyRQY",
+            authDomain: "mkayo-tasks-tracker.firebaseapp.com",
+            databaseURL: "https://mkayo-tasks-tracker-default-rtdb.firebaseio.com",
+            projectId: "mkayo-tasks-tracker",
+            storageBucket: "mkayo-tasks-tracker.firebasestorage.app",
+            messagingSenderId: "247715284898",
+            appId: "1:247715284898:web:57b66ddd7483061b9694fb"
+        };
 
-<body class="min-h-screen bg-gray-100">
-<div id="root"></div>
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
 
-<script>
-/* ===============================
-   🔥 FIREBASE CONFIG
-   =============================== */
-const firebaseConfig = {
-  apiKey: "AIzaSyD2Lj6-ML72Ok3ZhMlN2_GorYOguZzyRQY",
-  authDomain: "mkayo-tasks-tracker.firebaseapp.com",
-  databaseURL: "https://mkayo-tasks-tracker-default-rtdb.firebaseio.com",
-  projectId: "mkayo-tasks-tracker",
-  storageBucket: "mkayo-tasks-tracker.firebasestorage.app",
-  messagingSenderId: "247715284898",
-  appId: "1:247715284898:web:57b66ddd7483061b9694fb"
-};
+        // Admin email - CHANGE THIS TO YOUR EMAIL
+        const ADMIN_EMAIL = "mkayodeonline@gmail.com";
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const database = firebase.database();
+        // ============================================
+        // APP STATE
+        // ============================================
+        let currentUser = null;
+        let isAdmin = false;
+        let currentView = 'login';
 
-/* ===============================
-   👑 ADMIN
-   =============================== */
-const ADMIN_EMAIL = "mkayodeonline@gmail.com";
+        // ============================================
+        // ICONS (SVG)
+        // ============================================
+        const Icons = {
+            Plus: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
+            Trash: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`,
+            Edit: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>`,
+            Check: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+            X: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+            Moon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`,
+            Sun: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line></svg>`,
+            User: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`,
+            LogOut: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`,
+            Users: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`,
+            Activity: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>`,
+            Calendar: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`,
+            TrendingUp: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>`
+        };
 
-/* ===============================
-   🌍 GLOBAL STATE
-   =============================== */
-let currentUser = null;
-let isAdmin = false;
-let view = "login";
+        // ============================================
+        // HELPER FUNCTIONS
+        // ============================================
+        function showMessage(message, type = 'info') {
+            const colors = {
+                error: 'bg-red-500',
+                success: 'bg-green-500',
+                info: 'bg-blue-500'
+            };
+            
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-opacity`;
+            msgDiv.textContent = message;
+            document.body.appendChild(msgDiv);
+            
+            setTimeout(() => {
+                msgDiv.style.opacity = '0';
+                setTimeout(() => msgDiv.remove(), 300);
+            }, 3000);
+        }
 
-const MONTHS = [
-  "January","February","March","April","May","June",
-  "July","August","September","October","November","December"
-];
+        // ============================================
+        // AUTH FUNCTIONS
+        // ============================================
+        async function handleRegister(email, password, name) {
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                await userCredential.user.updateProfile({ displayName: name });
+                
+                await database.ref('users/' + userCredential.user.uid).set({
+                    name: name,
+                    email: email,
+                    createdAt: Date.now(),
+                    lastActive: Date.now()
+                });
+                
+                showMessage('Account created successfully!', 'success');
+                currentView = 'tasks';
+                render();
+            } catch (error) {
+                showMessage(error.message, 'error');
+            }
+        }
 
-/* ===============================
-   🔔 UTIL
-   =============================== */
-function notify(msg){
-  alert(msg);
-}
+        async function handleLogin(email, password) {
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                showMessage('Logged in successfully!', 'success');
+                currentView = 'tasks';
+                render();
+            } catch (error) {
+                showMessage(error.message, 'error');
+            }
+        }
 
-/* ===============================
-   🔐 AUTH HANDLERS
-   =============================== */
-function login(){
-  const e = email.value;
-  const p = password.value;
-  auth.signInWithEmailAndPassword(e,p).catch(err=>notify(err.message));
-}
+        async function handleLogout() {
+            try {
+                await auth.signOut();
+                currentView = 'login';
+                currentUser = null;
+                isAdmin = false;
+                showMessage('Logged out successfully!', 'success');
+                render();
+            } catch (error) {
+                showMessage(error.message, 'error');
+            }
+        }
 
-function registerUser(){
-  const n = name.value;
-  const e = email.value;
-  const p = password.value;
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                isAdmin = user.email === ADMIN_EMAIL;
+                
+                await database.ref('users/' + user.uid + '/lastActive').set(Date.now());
+                
+                if (currentView === 'login' || currentView === 'register') {
+                    currentView = 'tasks';
+                }
+                render();
+            } else {
+                currentUser = null;
+                isAdmin = false;
+                currentView = 'login';
+                render();
+            }
+        });
 
-  auth.createUserWithEmailAndPassword(e,p).then(res=>{
-    res.user.updateProfile({displayName:n});
-    database.ref("users/"+res.user.uid).set({
-      name:n,
-      email:e,
-      createdAt:Date.now()
-    });
-  }).catch(err=>notify(err.message));
-}
+        // ============================================
+        // RENDER FUNCTIONS
+        // ============================================
+        function render() {
+            const root = document.getElementById('root');
+            
+            if (currentView === 'login') {
+                root.innerHTML = renderLogin();
+            } else if (currentView === 'register') {
+                root.innerHTML = renderRegister();
+            } else if (currentView === 'tasks') {
+                root.innerHTML = renderTasksPage();
+                initializeTasksPage();
+            } else if (currentView === 'admin' && isAdmin) {
+                root.innerHTML = renderAdminPage();
+                loadAdminData();
+            }
+        }
 
-function logout(){
-  auth.signOut();
-}
+        function renderLogin() {
+            return `
+                <div class="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center p-6">
+                    <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full">
+                        <div class="text-center mb-8">
+                            <h1 class="text-3xl font-bold text-gray-800 mb-2">Welcome Back</h1>
+                            <p class="text-gray-600">Sign in to access your tasks</p>
+                        </div>
+                        
+                        <div id="login-form">
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                <input type="email" id="login-email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="your@email.com">
+                            </div>
+                            
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                                <input type="password" id="login-password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="••••••••">
+                            </div>
+                            
+                            <button onclick="handleLoginSubmit()" class="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition-colors font-medium mb-4">
+                                Sign In
+                            </button>
+                            
+                            <div class="text-center">
+                                <p class="text-gray-600">Don't have an account? 
+                                    <button onclick="currentView='register'; render();" class="text-indigo-600 hover:text-indigo-700 font-medium">Sign Up</button>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
 
-/* ===============================
-   🔄 AUTH STATE
-   =============================== */
-auth.onAuthStateChanged(user=>{
-  if(user){
-    currentUser = user;
-    isAdmin = user.email === ADMIN_EMAIL;
-    view = "dashboard";
-  }else{
-    currentUser = null;
-    isAdmin = false;
-    view = "login";
-  }
-  render();
-});
+        function renderRegister() {
+            return `
+                <div class="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center p-6">
+                    <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full">
+                        <div class="text-center mb-8">
+                            <h1 class="text-3xl font-bold text-gray-800 mb-2">Create Account</h1>
+                            <p class="text-gray-600">Start tracking your tasks today</p>
+                        </div>
+                        
+                        <div id="register-form">
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                                <input type="text" id="register-name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="John Doe">
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                <input type="email" id="register-email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="your@email.com">
+                            </div>
+                            
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                                <input type="password" id="register-password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="••••••••">
+                                <p class="text-xs text-gray-500 mt-1">Minimum 6 characters</p>
+                            </div>
+                            
+                            <button onclick="handleRegisterSubmit()" class="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition-colors font-medium mb-4">
+                                Create Account
+                            </button>
+                            
+                            <div class="text-center">
+                                <p class="text-gray-600">Already have an account? 
+                                    <button onclick="currentView='login'; render();" class="text-indigo-600 hover:text-indigo-700 font-medium">Sign In</button>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
 
-/* ===============================
-   🖥️ RENDER
-   =============================== */
-function render(){
-  if(view==="login") return renderLogin();
-  if(view==="register") return renderRegister();
-  if(view==="dashboard") return isAdmin ? renderAdmin() : renderDashboard();
-}
+        function renderTasksPage() {
+    const darkMode = localStorage.getItem('darkMode') === 'true';
 
-/* ===============================
-   🔑 LOGIN
-   =============================== */
-function renderLogin(){
-  root.innerHTML = `
-  <div class="flex items-center justify-center min-h-screen">
-    <div class="bg-white p-8 rounded shadow w-full max-w-md">
-      <h2 class="text-2xl font-bold mb-6">Login</h2>
-      <input id="email" class="w-full mb-3 p-2 border rounded" placeholder="Email">
-      <input id="password" type="password" class="w-full mb-4 p-2 border rounded" placeholder="Password">
-      <button onclick="login()" class="w-full bg-blue-600 text-white p-2 rounded">Login</button>
-      <p class="mt-4 text-sm">No account?
-        <button onclick="view='register';render()" class="text-blue-600">Register</button>
-      </p>
-    </div>
-  </div>`;
-}
+    return `
+    <div class="min-h-screen p-6 transition-colors ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50'}">
+        <div class="max-w-7xl mx-auto">
 
-/* ===============================
-   📝 REGISTER
-   =============================== */
-function renderRegister(){
-  root.innerHTML = `
-  <div class="flex items-center justify-center min-h-screen">
-    <div class="bg-white p-8 rounded shadow w-full max-w-md">
-      <h2 class="text-2xl font-bold mb-6">Register</h2>
-      <input id="name" class="w-full mb-3 p-2 border rounded" placeholder="Full name">
-      <input id="email" class="w-full mb-3 p-2 border rounded" placeholder="Email">
-      <input id="password" type="password" class="w-full mb-4 p-2 border rounded" placeholder="Password">
-      <button onclick="registerUser()" class="w-full bg-green-600 text-white p-2 rounded">Create Account</button>
-      <p class="mt-4 text-sm">
-        <button onclick="view='login';render()" class="text-blue-600">Back to login</button>
-      </p>
-    </div>
-  </div>`;
-}
+            <!-- HEADER -->
+            <div class="mb-8 flex items-center justify-between">
+                <div>
+                    <h1 class="text-4xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-800'}">
+                        Mkayode Online Task Tracker
+                    </h1>
+                    <p class="${darkMode ? 'text-gray-400' : 'text-gray-600'}">
+                        Track your progress week by week
+                    </p>
+                </div>
 
-/* ===============================
-   👤 USER DASHBOARD
-   =============================== */
-function renderDashboard(){
-  root.innerHTML = `
-  <div class="p-6 max-w-5xl mx-auto">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold">My Tasks</h1>
-      <button onclick="logout()" class="bg-red-600 text-white px-4 py-2 rounded">Logout</button>
-    </div>
+                <div class="flex gap-3">
+                    <button onclick="toggleDarkMode()"
+                        class="p-3 rounded-lg shadow-md transition-colors
+                        ${darkMode ? 'bg-gray-800 text-yellow-400 hover:bg-gray-700'
+                                   : 'bg-white text-gray-700 hover:bg-gray-100'}">
+                        ${darkMode ? Icons.Sun : Icons.Moon}
+                    </button>
 
-    <button onclick="addTask()" class="mb-4 bg-blue-600 text-white px-4 py-2 rounded">
-      + Add Task
-    </button>
+                    <button onclick="handleLogout()"
+                        class="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                        ${Icons.LogOut}
+                        Logout
+                    </button>
+                </div>
+            </div>
 
-    <div id="tasks"></div>
-  </div>`;
-  loadTasks();
-}
+            <!-- MONTH / YEAR SELECTOR -->
+            <div class="p-6 rounded-xl shadow-lg mb-6 border
+                ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}">
+                
+                <div class="flex items-center gap-3 mb-4">
+                    ${Icons.Calendar}
+                    <h2 class="text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}">
+                        Select Month
+                    </h2>
+                </div>
 
-/* ===============================
-   👑 ADMIN DASHBOARD
-   =============================== */
-function renderAdmin(){
-  root.innerHTML = `
-  <div class="p-6 max-w-6xl mx-auto">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold">Admin Dashboard</h1>
-      <button onclick="logout()" class="bg-red-600 text-white px-4 py-2 rounded">Logout</button>
-    </div>
-    <div id="adminUsers" class="bg-white p-6 rounded shadow"></div>
-  </div>`;
-  loadUsers();
-}
+                <div class="flex gap-4 flex-wrap">
+                    <select id="monthSelect" onchange="saveMonthYear()"
+                        class="px-4 py-2 border rounded-lg
+                        ${darkMode ? 'bg-gray-700 text-white border-gray-600'
+                                   : 'bg-white border-gray-300'}">
+                        ${['January','February','March','April','May','June','July','August','September','October','November','December']
+                          .map((m,i)=>`<option value="${i+1}">${m}</option>`).join('')}
+                    </select>
 
-/* ===============================
-   📋 TASKS
-   =============================== */
-function addTask(){
-  const title = prompt("Task title");
-  if(!title) return;
-  database.ref("tasks/"+currentUser.uid).push({
-    title,
-    completed:false,
-    createdAt:Date.now()
-  });
-}
+                    <select id="yearSelect" onchange="saveMonthYear()"
+                        class="px-4 py-2 border rounded-lg
+                        ${darkMode ? 'bg-gray-700 text-white border-gray-600'
+                                   : 'bg-white border-gray-300'}">
+                        ${[2024,2025,2026,2027].map(y=>`<option value="${y}">${y}</option>`).join('')}
+                    </select>
+                </div>
+            </div>
 
-function loadTasks(){
-  database.ref("tasks/"+currentUser.uid).on("value",snap=>{
-    const data = snap.val()||{};
-    tasks.innerHTML = Object.entries(data).map(([id,t])=>`
-      <div class="bg-white p-3 mb-2 rounded shadow flex justify-between">
-        <span>${t.title}</span>
-        <button onclick="database.ref('tasks/${currentUser.uid}/${id}').remove()" class="text-red-600">Delete</button>
-      </div>
-    `).join("");
-  });
-}
-
-/* ===============================
-   👥 ADMIN USERS
-   =============================== */
-function loadUsers(){
-  database.ref("users").once("value").then(snap=>{
-    const users = snap.val()||{};
-    adminUsers.innerHTML = `
-      <h2 class="text-xl font-bold mb-4">Registered Users</h2>
-      ${Object.values(users).map(u=>`
-        <div class="border-b py-2">
-          <strong>${u.name}</strong><br>
-          <span class="text-sm text-gray-600">${u.email}</span>
+            <!-- TASKS CONTENT -->
+            <div id="tasks-content" class="space-y-6"></div>
         </div>
-      `).join("")}
+    </div>
     `;
-  });
 }
 
-render();
-</script>
+       function saveMonthYear() {
+    localStorage.setItem('selectedMonth', document.getElementById('monthSelect').value);
+    localStorage.setItem('selectedYear', document.getElementById('yearSelect').value);
+}
+
+        function renderAdminPage() {
+            return `
+                <div class="bg-gray-900 min-h-screen p-6">
+                    <div class="max-w-7xl mx-auto">
+                        <div class="mb-8 flex items-center justify-between">
+                            <div>
+                                <h1 class="text-white text-4xl font-bold mb-2">Admin Dashboard</h1>
+                                <p class="text-gray-400">Overview of all users and their activity</p>
+                            </div>
+                            <div class="flex gap-3">
+                                <button onclick="currentView='tasks'; render();" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                                    Back to Tasks
+                                </button>
+                                <button onclick="handleLogout()" class="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                                    ${Icons.LogOut}
+                                    Logout
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="admin-stats" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        </div>
+                        
+                        <div id="admin-users" class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 p-6">
+                            <h2 class="text-white text-2xl font-semibold mb-4">User List</h2>
+                            <div id="users-list" class="space-y-3">
+                                <p class="text-gray-400">Loading users...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleLoginSubmit() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            if (!email || !password) {
+                showMessage('Please fill in all fields', 'error');
+                return;
+            }
+            
+            handleLogin(email, password);
+        }
+
+        function handleRegisterSubmit() {
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            
+            if (!name || !email || !password) {
+                showMessage('Please fill in all fields', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showMessage('Password must be at least 6 characters', 'error');
+                return;
+            }
+            
+            handleRegister(email, password, name);
+        }
+
+        function toggleDarkMode() {
+            const current = localStorage.getItem('darkMode') === 'true';
+            localStorage.setItem('darkMode', (!current).toString());
+            render();
+        }
+
+        async function initializeTasksPage() {
+            if (!currentUser) return;
+            
+            const darkMode = localStorage.getItem('darkMode') === 'true';
+            const tasksContent = document.getElementById('tasks-content');
+            
+            const tasksRef = database.ref('tasks/' + currentUser.uid);
+            tasksRef.on('value', (snapshot) => {
+                const tasks = snapshot.val() || {};
+               
+               function renderTasksList(tasks, darkMode) {
+    const month = Number(localStorage.getItem('selectedMonth') || 1);
+    const year = Number(localStorage.getItem('selectedYear') || 2026);
+
+    const list = Object.entries(tasks).map(([id,t])=>({id,...t}))
+        .filter(t=>t.month===month && t.year===year);
+
+    const completed = list.filter(t=>t.completed).length;
+    const total = list.length;
+    const percent = total ? Math.round((completed/total)*100) : 0;
+
+    const content = document.getElementById('tasks-content');
+
+    content.innerHTML = `
+        <!-- MONTH STATS -->
+        <div class="bg-gradient-to-br from-indigo-500 to-purple-600 p-6 rounded-xl shadow-lg text-white">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold">Month Overview</h3>
+                ${Icons.TrendingUp}
+            </div>
+            <div class="text-5xl font-bold mb-2">${percent}%</div>
+            <p class="text-indigo-100">${completed} of ${total} tasks completed</p>
+        </div>
+
+        <button onclick="addNewTask()"
+            class="flex items-center gap-2 px-5 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 shadow-md">
+            ${Icons.Plus}
+            Add New Task
+        </button>
+
+        ${list.map(t=>`
+            <div class="p-4 rounded-lg shadow border transition-colors
+                ${darkMode ? 'bg-gray-800 border-gray-700'
+                           : 'bg-white border-gray-200'}">
+                <div class="flex items-center gap-3">
+                    <input type="checkbox" ${t.completed?'checked':''}
+                        onchange="toggleTask('${t.id}', ${!t.completed})"
+                        class="w-5 h-5 text-indigo-600">
+
+                    <div class="flex-1">
+                        <div class="${t.completed?'line-through text-gray-500':
+                            darkMode?'text-white':'text-gray-800'} font-medium">
+                            ${t.title}
+                        </div>
+                        <div class="text-sm ${darkMode?'text-gray-400':'text-gray-500'}">
+                            Week ${t.week} • ${t.category}
+                        </div>
+                    </div>
+
+                    <button onclick="deleteTask('${t.id}')"
+                        class="p-2 rounded text-red-600 hover:bg-red-50">
+                        ${Icons.Trash}
+                    </button>
+                </div>
+            </div>
+        `).join('')}
+    `;
+}
+
+
+        async function addNewTask() {
+            const title = prompt('Enter task title:');
+            if (!title) return;
+            
+            const week = parseInt(prompt('Enter week number (1-4):') || '1');
+            const category = prompt('Enter category (Work, Personal, Health, Learning, Finance, Other):') || 'Work';
+            
+            const month = parseInt(localStorage.getItem('selectedMonth') || '1');
+            const year = parseInt(localStorage.getItem('selectedYear') || '2026');
+            
+            const taskRef = database.ref('tasks/' + currentUser.uid).push();
+            await taskRef.set({
+                title: title,
+                week: week,
+                month: month,
+                year: year,
+                category: category,
+                completed: false,
+                createdAt: Date.now()
+            });
+            
+            showMessage('Task added successfully!', 'success');
+        }
+
+        async function toggleTask(taskId, completed) {
+            await database.ref('tasks/' + currentUser.uid + '/' + taskId + '/completed').set(completed);
+        }
+
+        async function deleteTask(taskId) {
+            if (confirm('Are you sure you want to delete this task?')) {
+                await database.ref('tasks/' + currentUser.uid + '/' + taskId).remove();
+                showMessage('Task deleted', 'success');
+            }
+        }
+
+        async function loadAdminData() {
+            const usersSnapshot = await database.ref('users').once('value');
+            const users = usersSnapshot.val() || {};
+            
+            const tasksSnapshot = await database.ref('tasks').once('value');
+            const allTasks = tasksSnapshot.val() || {};
+            
+            const usersList = Object.entries(users).map(([uid, user]) => ({
+                uid,
+                ...user,
+                taskCount: allTasks[uid] ? Object.keys(allTasks[uid]).length : 0
+            }));
+            
+            const totalUsers = usersList.length;
+            const activeToday = usersList.filter(u => {
+                const lastActive = u.lastActive || 0;
+                const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
+                return lastActive > oneDayAgo;
+            }).length;
+            
+            let totalTasks = 0;
+            let completedTasks = 0;
+            Object.values(allTasks).forEach(userTasks => {
+                Object.values(userTasks).forEach(task => {
+                    totalTasks++;
+                    if (task.completed) completedTasks++;
+                });
+            });
+            
+            document.getElementById('admin-stats').innerHTML = `
+                <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-xl shadow-lg text-white">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Total Users</h3>
+                        ${Icons.Users}
+                    </div>
+                    <div class="text-4xl font-bold">${totalUsers}</div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-xl shadow-lg text-white">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Active Today</h3>
+                        ${Icons.Activity}
+                    </div>
+                    <div class="text-4xl font-bold">${activeToday}</div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-purple-500 to-purple-600 p-6 rounded-xl shadow-lg text-white">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Total Tasks</h3>
+                        ${Icons.Calendar}
+                    </div>
+                    <div class="text-4xl font-bold">${totalTasks}</div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 p-6 rounded-xl shadow-lg text-white">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Completed</h3>
+                        ${Icons.TrendingUp}
+                    </div>
+                    <div class="text-4xl font-bold">${completedTasks}</div>
+                </div>
+            `;
+            
+            document.getElementById('users-list').innerHTML = usersList.map(user => {
+                const lastActive = user.lastActive ? new Date(user.lastActive).toLocaleString() : 'Never';
+                return `
+                    <div class="bg-gray-700 p-4 rounded-lg flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
+                                ${user.name?.charAt(0).toUpperCase() || 'U'}
+                            </div>
+                            <div>
+                                <div class="text-white font-medium">${user.name || 'Unknown'}</div>
+                                <div class="text-gray-400 text-sm">${user.email}</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-white font-medium">${user.taskCount} tasks</div>
+                            <div class="text-gray-400 text-sm">Last active: ${lastActive}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Initialize app
+        render();
+    </script>
 </body>
-</html>
+    </html>
